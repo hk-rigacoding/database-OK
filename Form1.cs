@@ -43,59 +43,47 @@ namespace database
             {
                 try
                 {
-                    log.Text = "Opening Connection to DB Server ... " + Environment.NewLine + log.Text;
+                    log.AppendText("Opening Connection to DB Server ... ");
                     conn.Open();
-                    log.Text = "SUCCESS !" + Environment.NewLine + log.Text;
+                    log.AppendText ("SUCCESS !" + Environment.NewLine);
                     query.ReadOnly = false;
 
                 }
                 catch (Exception exc)
                 {
-                    log.Text = exc.Message + Environment.NewLine + log.Text;
+                    log.AppendText(exc.Message + Environment.NewLine);
                 }
             } else // aizpildīts query
             {
                 try
                 {
-                    MySqlCommand cmd = new MySqlCommand(query.Text, conn);
-
-
-                    //if (query.Text.ToLower().Contains("select"))
-                    if (true)
+                    using (var cmd = new MySqlCommand(query.Text, conn))
                     {
-                        //gadījums, kad izgūstam datus no datubāzes
-                        //cmd.ExecuteReader
-
-                        //veidu, kā izgūt datus
-                        MySqlDataReader reader = cmd.ExecuteReader();//sūtam query.text saturu komandu
-
-                        while (reader.Read())
+                        using (MySqlDataReader reader = cmd.ExecuteReader())//sūtam query.text saturu komandu
                         {
-                            string temp2 = "";
+                            while (reader.Read())
+                            {
 
-                            for (int i=0; i< reader.FieldCount; i++)
-                                temp2 += reader[i].ToString();
+                                for (int i = 0; i < reader.FieldCount; i++)
+                                    log.AppendText(reader[i].ToString() + " ");
 
-                            log.Text = temp2 + Environment.NewLine + log.Text;
+                                log.AppendText(Environment.NewLine);
+
+                            }
+
+                            reader.Close();
                         }
-
-                        reader.Close();
-
-                    } else
-                    {
-                        //gadījums, kad mums nav atbildes datu
-                        cmd.ExecuteNonQuery();
 
 
                     }
 
-
-
                 }
                 catch (Exception exc)
                 {
-                    log.Text = exc.Message + Environment.NewLine + log.Text;
+                    log.AppendText(exc.Message + Environment.NewLine);
                 }
+
+                
 
             }
 
